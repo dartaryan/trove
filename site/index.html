@@ -282,7 +282,13 @@ header {
   margin-left: 4px;
 }
 
-.filter-select {
+/* Custom dropdown */
+.dropdown {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dropdown-trigger {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-secondary);
@@ -292,16 +298,82 @@ header {
   padding: 5px 28px 5px 10px;
   cursor: pointer;
   outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6580' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: border-color var(--t-fast);
+  white-space: nowrap;
+  transition: border-color var(--t-fast), color var(--t-fast);
+  position: relative;
 }
 
-.filter-select:focus { border-color: var(--accent); }
-.filter-select option { background: var(--surface); color: var(--text-primary); }
+.dropdown-trigger::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid var(--text-muted);
+  transition: transform var(--t-fast);
+}
+
+.dropdown.open .dropdown-trigger::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.dropdown-trigger:hover,
+.dropdown.open .dropdown-trigger {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.dropdown-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--surface-border-hover);
+  border-radius: var(--r-md);
+  padding: 4px;
+  z-index: 150;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-border-hover) transparent;
+}
+
+.dropdown.open .dropdown-menu {
+  display: block;
+}
+
+.dropdown-item {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.dropdown-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.dropdown-item.active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
 
 /* Mobile filter toggle */
 .filter-toggle {
@@ -817,25 +889,31 @@ footer {
 
     <div class="filter-sep"></div>
 
-    <select class="filter-select" id="type-filter" aria-label="Filter by type">
-      <option value="all">All types</option>
-    </select>
+    <div class="dropdown" id="type-dropdown" data-filter="type">
+      <button class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">All types</button>
+      <div class="dropdown-menu" role="listbox"></div>
+    </div>
 
-    <select class="filter-select" id="status-filter" aria-label="Filter by status">
-      <option value="all">All statuses</option>
-    </select>
+    <div class="dropdown" id="status-dropdown" data-filter="status">
+      <button class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">All statuses</button>
+      <div class="dropdown-menu" role="listbox"></div>
+    </div>
 
-    <select class="filter-select" id="project-filter" aria-label="Filter by project">
-      <option value="all">All projects</option>
-    </select>
+    <div class="dropdown" id="project-dropdown" data-filter="project">
+      <button class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">All projects</button>
+      <div class="dropdown-menu" role="listbox"></div>
+    </div>
 
     <div class="filter-sep"></div>
 
-    <select class="filter-select" id="sort-select" aria-label="Sort by">
-      <option value="date">Newest first</option>
-      <option value="title">Title A-Z</option>
-      <option value="category">Category</option>
-    </select>
+    <div class="dropdown" id="sort-dropdown" data-filter="sort">
+      <button class="dropdown-trigger" aria-haspopup="listbox" aria-expanded="false">Newest first</button>
+      <div class="dropdown-menu" role="listbox">
+        <div class="dropdown-item active" data-value="date" role="option">Newest first</div>
+        <div class="dropdown-item" data-value="title" role="option">Title A-Z</div>
+        <div class="dropdown-item" data-value="category" role="option">Category</div>
+      </div>
+    </div>
   </div>
 </nav>
 
@@ -913,10 +991,10 @@ const dom = {
   statsBar: document.getElementById('stats-bar'),
   emptyState: document.getElementById('empty-state'),
   categoryTabs: document.getElementById('category-tabs'),
-  typeFilter: document.getElementById('type-filter'),
-  statusFilter: document.getElementById('status-filter'),
-  projectFilter: document.getElementById('project-filter'),
-  sortSelect: document.getElementById('sort-select'),
+  typeDropdown: document.getElementById('type-dropdown'),
+  statusDropdown: document.getElementById('status-dropdown'),
+  projectDropdown: document.getElementById('project-dropdown'),
+  sortDropdown: document.getElementById('sort-dropdown'),
   modalBackdrop: document.getElementById('modal-backdrop'),
   modalPanel: document.getElementById('modal-panel'),
   modalClose: document.getElementById('modal-close'),
@@ -995,32 +1073,24 @@ function populateFilters() {
     return `<button class="cat-btn${cat === 'all' ? ' active' : ''}" data-cat="${cat}">${label}<span class="cat-count">${count}</span></button>`;
   }).join('');
 
-  // Type filter
+  // Type dropdown
   const types = [...new Set(allItems.map(i => i.type))].sort();
-  types.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t;
-    opt.textContent = t;
-    dom.typeFilter.appendChild(opt);
-  });
+  fillDropdown(dom.typeDropdown, [{ value: 'all', label: 'All types' }, ...types.map(t => ({ value: t, label: t }))]);
 
-  // Status filter
+  // Status dropdown
   const statuses = [...new Set(allItems.map(i => i.status))].sort();
-  statuses.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s;
-    opt.textContent = s;
-    dom.statusFilter.appendChild(opt);
-  });
+  fillDropdown(dom.statusDropdown, [{ value: 'all', label: 'All statuses' }, ...statuses.map(s => ({ value: s, label: s }))]);
 
-  // Project filter
+  // Project dropdown
   const projects = [...new Set(allItems.flatMap(i => i.projects))].sort();
-  projects.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p;
-    opt.textContent = p;
-    dom.projectFilter.appendChild(opt);
-  });
+  fillDropdown(dom.projectDropdown, [{ value: 'all', label: 'All projects' }, ...projects.map(p => ({ value: p, label: p }))]);
+}
+
+function fillDropdown(dropdown, options) {
+  const menu = dropdown.querySelector('.dropdown-menu');
+  menu.innerHTML = options.map((o, i) =>
+    `<div class="dropdown-item${i === 0 ? ' active' : ''}" data-value="${esc(o.value)}" role="option">${esc(o.label)}</div>`
+  ).join('');
 }
 
 /* ============================================================
@@ -1178,11 +1248,38 @@ function bindEvents() {
     applyFilters();
   });
 
-  // Select filters
-  dom.typeFilter.addEventListener('change', () => { activeFilters.type = dom.typeFilter.value; applyFilters(); });
-  dom.statusFilter.addEventListener('change', () => { activeFilters.status = dom.statusFilter.value; applyFilters(); });
-  dom.projectFilter.addEventListener('change', () => { activeFilters.project = dom.projectFilter.value; applyFilters(); });
-  dom.sortSelect.addEventListener('change', () => { activeFilters.sort = dom.sortSelect.value; applyFilters(); });
+  // Custom dropdowns
+  document.querySelectorAll('.dropdown').forEach(dd => {
+    const trigger = dd.querySelector('.dropdown-trigger');
+    const menu = dd.querySelector('.dropdown-menu');
+    const filterKey = dd.dataset.filter;
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const wasOpen = dd.classList.contains('open');
+      closeAllDropdowns();
+      if (!wasOpen) {
+        dd.classList.add('open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    menu.addEventListener('click', (e) => {
+      const item = e.target.closest('.dropdown-item');
+      if (!item) return;
+      const value = item.dataset.value;
+      menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      trigger.textContent = item.textContent;
+      dd.classList.remove('open');
+      trigger.setAttribute('aria-expanded', 'false');
+      activeFilters[filterKey] = value;
+      applyFilters();
+    });
+  });
+
+  // Close dropdowns on outside click
+  document.addEventListener('click', () => closeAllDropdowns());
 
   // Card clicks (delegated)
   dom.grid.addEventListener('click', (e) => {
@@ -1209,7 +1306,10 @@ function bindEvents() {
     if (e.target === dom.modalBackdrop) closeModal();
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && dom.modalBackdrop.classList.contains('open')) closeModal();
+    if (e.key === 'Escape') {
+      closeAllDropdowns();
+      if (dom.modalBackdrop.classList.contains('open')) closeModal();
+    }
   });
 
   // Mobile filter toggle
@@ -1222,6 +1322,13 @@ function bindEvents() {
 /* ============================================================
    UTILITIES
    ============================================================ */
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown.open').forEach(dd => {
+    dd.classList.remove('open');
+    dd.querySelector('.dropdown-trigger').setAttribute('aria-expanded', 'false');
+  });
+}
+
 function esc(str) {
   if (typeof str !== 'string') return '';
   const div = document.createElement('div');
