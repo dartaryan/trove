@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TROVE — Ben's Idea Vault</title>
+  <meta name="description" content="A curated collection of tools, patterns, insights, and teaching material.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1f5dd;</text></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700&family=JetBrains+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Highlight.js theme -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES
+   ============================================================ */
+:root {
+  --bg: #0a0a0f;
+  --bg-subtle: #0e0e16;
+  --surface: #1a1a2e;
+  --surface-hover: #22223a;
+  --surface-border: #2a2a3e;
+  --surface-border-hover: #3c3c52;
+
+  --primary: #3c0366;
+  --primary-light: #5a0f8a;
+  --accent: #fcb700;
+  --accent-dim: rgba(252, 183, 0, 0.12);
+  --accent-glow: rgba(252, 183, 0, 0.06);
+
+  --text-primary: #e8e6f0;
+  --text-secondary: #a09bb0;
+  --text-muted: #6b6580;
+  --text-accent: #fcb700;
+
+  --type-tool: #60a5fa;
+  --type-pattern: #a78bfa;
+  --type-demo: #f472b6;
+  --type-concept: #34d399;
+  --type-resource: #fb923c;
+  --type-datapoint: #facc15;
+  --type-idea: #22d3ee;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Public Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-full: 9999px;
+
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.45);
+  --shadow-modal: 0 16px 64px rgba(0,0,0,0.6);
+
+  --t-fast: 150ms ease-out;
+  --t-base: 200ms ease-out;
+  --t-slow: 300ms ease-out;
+
+  --max-width: 1280px;
+  --header-height: 64px;
+}
+
+/* ============================================================
+   RESET + BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body.modal-open { overflow: hidden; }
+
+::selection {
+  background: rgba(252, 183, 0, 0.25);
+  color: #fff;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ============================================================
+   NOISE OVERLAY
+   ============================================================ */
+#noise {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+}
+
+.logo-key {
+  font-size: 22px;
+  filter: drop-shadow(0 0 6px rgba(252, 183, 0, 0.4));
+}
+
+.logo-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stat-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  white-space: nowrap;
+}
+
+.stat-pill .stat-num {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.search-wrap {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  margin-left: auto;
+  position: relative;
+}
+
+.search-wrap svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-md);
+  padding: 8px 12px 8px 36px;
+  outline: none;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+/* ============================================================
+   FILTER BAR
+   ============================================================ */
+.filter-bar {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid rgba(42, 42, 62, 0.5);
+}
+
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.filter-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--surface-border);
+  flex-shrink: 0;
+}
+
+.cat-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 5px 12px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+
+.cat-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface);
+}
+
+.cat-btn.active {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+
+.cat-btn .cat-count {
+  opacity: 0.7;
+  margin-left: 4px;
+}
+
+.filter-select {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-sm);
+  padding: 5px 28px 5px 10px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6580' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color var(--t-fast);
+}
+
+.filter-select:focus { border-color: var(--accent); }
+.filter-select option { background: var(--surface); color: var(--text-primary); }
+
+/* Mobile filter toggle */
+.filter-toggle {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-sm);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: border-color var(--t-fast);
+}
+
+.filter-toggle:hover { border-color: var(--accent); color: var(--text-primary); }
+
+.filters-collapsible { display: contents; }
+
+/* ============================================================
+   CARD GRID
+   ============================================================ */
+.main-content {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  cursor: pointer;
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: cardReveal 0.4s ease-out forwards;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--surface-border-hover);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@keyframes cardReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.badge-type {
+  color: #fff;
+}
+
+.badge-type[data-type="tool"]      { background: rgba(96,165,250,0.2); color: var(--type-tool); }
+.badge-type[data-type="pattern"]   { background: rgba(167,139,250,0.2); color: var(--type-pattern); }
+.badge-type[data-type="demo"]      { background: rgba(244,114,182,0.2); color: var(--type-demo); }
+.badge-type[data-type="concept"]   { background: rgba(52,211,153,0.2); color: var(--type-concept); }
+.badge-type[data-type="resource"]  { background: rgba(251,146,60,0.2); color: var(--type-resource); }
+.badge-type[data-type="datapoint"] { background: rgba(250,204,21,0.2); color: var(--type-datapoint); }
+.badge-type[data-type="idea"]      { background: rgba(34,211,238,0.2); color: var(--type-idea); }
+
+.card-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+  transition: color var(--t-base);
+}
+
+.card:hover .card-title {
+  color: var(--accent);
+}
+
+.badge-category {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  background: rgba(60, 3, 102, 0.25);
+  border: 1px solid rgba(60, 3, 102, 0.4);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.card-tldr {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+  margin: 16px 0 12px;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-accent);
+  background: var(--accent-dim);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.empty-state.visible { display: flex; }
+
+.empty-key {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.3;
+  filter: drop-shadow(0 0 20px rgba(252, 183, 0, 0.2));
+}
+
+.empty-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.empty-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 24px;
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity var(--t-base);
+}
+
+.modal-backdrop.open {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-panel {
+  background: var(--bg-subtle);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-lg);
+  max-width: 740px;
+  width: 100%;
+  padding: 36px;
+  box-shadow: var(--shadow-modal);
+  position: relative;
+  transform: translateY(20px);
+  transition: transform var(--t-slow);
+}
+
+.modal-backdrop.open .modal-panel {
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+
+.modal-close:hover { border-color: var(--accent); color: var(--text-primary); }
+.modal-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.modal-divider {
+  border: none;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--primary), transparent);
+  margin: 20px 0;
+}
+
+/* Markdown rendered content */
+.modal-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.modal-body h1 { display: none; } /* hide duplicate title */
+
+.modal-body h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 28px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.modal-body h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 20px 0 8px;
+}
+
+.modal-body p { margin: 0 0 12px; }
+
+.modal-body ul, .modal-body ol {
+  margin: 0 0 12px;
+  padding-left: 24px;
+}
+
+.modal-body li { margin-bottom: 4px; }
+
+.modal-body strong { color: var(--text-primary); }
+
+.modal-body a { color: var(--accent); }
+.modal-body a:hover { text-decoration: underline; }
+
+.modal-body code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--type-tool);
+}
+
+.modal-body pre {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+
+.modal-body pre code {
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.modal-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--surface-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.modal-footer-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.modal-projects {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.modal-source {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 6px;
+  word-break: break-all;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  border-top: 1px solid var(--surface-border);
+  margin-top: 60px;
+}
+
+.footer-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.footer-link {
+  color: var(--text-muted);
+  transition: color var(--t-fast);
+}
+.footer-link:hover { color: var(--accent); text-decoration: none; }
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .logo-sub { display: none; }
+
+  .stats-bar { display: none; }
+
+  .search-wrap {
+    min-width: unset;
+    max-width: unset;
+    flex: 1 1 100%;
+    order: 10;
+    margin-left: 0;
+  }
+
+  .filter-toggle { display: block; }
+
+  .filters-collapsible {
+    display: none;
+  }
+  .filters-collapsible.open {
+    display: contents;
+  }
+
+  .filter-bar {
+    flex-wrap: wrap;
+    padding: 10px 16px;
+  }
+
+  .main-content { padding: 16px; }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .modal-backdrop { padding: 16px; }
+
+  .modal-panel { padding: 24px; }
+
+  .modal-title { font-size: 24px; }
+
+  .footer-inner {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .card { padding: 18px; }
+  .card-title { font-size: 19px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Noise overlay -->
+<div id="noise"></div>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-key">&#x1f5dd;&#xfe0f;</span>
+      <span class="logo-text">TROVE</span>
+      <span class="logo-sub">idea vault</span>
+    </div>
+
+    <div class="stats-bar" id="stats-bar"></div>
+
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="search-input" id="search-input" placeholder="Search the vault..." aria-label="Search vault items">
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     FILTER BAR
+     ============================================================ -->
+<nav class="filter-bar" aria-label="Filters">
+  <button class="filter-toggle" id="filter-toggle" aria-expanded="false">Filters</button>
+
+  <div class="filters-collapsible" id="filters-collapsible">
+    <div class="filter-group" id="category-tabs"></div>
+
+    <div class="filter-sep"></div>
+
+    <select class="filter-select" id="type-filter" aria-label="Filter by type">
+      <option value="all">All types</option>
+    </select>
+
+    <select class="filter-select" id="status-filter" aria-label="Filter by status">
+      <option value="all">All statuses</option>
+    </select>
+
+    <select class="filter-select" id="project-filter" aria-label="Filter by project">
+      <option value="all">All projects</option>
+    </select>
+
+    <div class="filter-sep"></div>
+
+    <select class="filter-select" id="sort-select" aria-label="Sort by">
+      <option value="date">Newest first</option>
+      <option value="title">Title A-Z</option>
+      <option value="category">Category</option>
+    </select>
+  </div>
+</nav>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="main-content">
+  <div class="card-grid" id="card-grid"></div>
+
+  <div class="empty-state" id="empty-state">
+    <div class="empty-key">&#x1f5dd;&#xfe0f;</div>
+    <div class="empty-title">The vault is quiet here...</div>
+    <div class="empty-sub">Try adjusting your filters or search terms.</div>
+  </div>
+</main>
+
+<!-- ============================================================
+     MODAL
+     ============================================================ -->
+<div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-panel" id="modal-panel">
+    <button class="modal-close" id="modal-close" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="modal-meta" id="modal-meta"></div>
+    <h2 class="modal-title" id="modal-title"></h2>
+    <hr class="modal-divider">
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer>
+  <div class="footer-inner">
+    <span>TROVE -- Built by Ben Akiva</span>
+    <a href="https://github.com/dartaryan/trove" target="_blank" rel="noopener" class="footer-link">GitHub</a>
+  </div>
+</footer>
+
+<!-- ============================================================
+     SCRIPTS (CDN)
+     ============================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let allItems = [];
+let filteredItems = [];
+let stats = {};
+let fuse = null;
+let currentItem = null;
+
+const activeFilters = {
+  category: 'all',
+  type: 'all',
+  status: 'all',
+  project: 'all',
+  search: '',
+  sort: 'date',
+};
+
+/* ============================================================
+   DOM REFS
+   ============================================================ */
+const dom = {
+  grid: document.getElementById('card-grid'),
+  search: document.getElementById('search-input'),
+  statsBar: document.getElementById('stats-bar'),
+  emptyState: document.getElementById('empty-state'),
+  categoryTabs: document.getElementById('category-tabs'),
+  typeFilter: document.getElementById('type-filter'),
+  statusFilter: document.getElementById('status-filter'),
+  projectFilter: document.getElementById('project-filter'),
+  sortSelect: document.getElementById('sort-select'),
+  modalBackdrop: document.getElementById('modal-backdrop'),
+  modalPanel: document.getElementById('modal-panel'),
+  modalClose: document.getElementById('modal-close'),
+  modalMeta: document.getElementById('modal-meta'),
+  modalTitle: document.getElementById('modal-title'),
+  modalBody: document.getElementById('modal-body'),
+  modalFooter: document.getElementById('modal-footer'),
+  filterToggle: document.getElementById('filter-toggle'),
+  filtersCollapsible: document.getElementById('filters-collapsible'),
+};
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function init() {
+  try {
+    const res = await fetch('data.json');
+    const data = await res.json();
+    allItems = data.items;
+    stats = data.stats;
+  } catch (e) {
+    dom.grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">Could not load data.json</p>';
+    return;
+  }
+
+  fuse = new Fuse(allItems, {
+    keys: [
+      { name: 'title', weight: 3 },
+      { name: 'tldr', weight: 2 },
+      { name: 'tags', weight: 2 },
+      { name: 'body', weight: 1 },
+    ],
+    threshold: 0.35,
+    ignoreLocation: true,
+  });
+
+  marked.setOptions({
+    gfm: true,
+    breaks: false,
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(code, { language: lang }).value;
+      }
+      return hljs.highlightAuto(code).value;
+    },
+  });
+
+  renderStats();
+  populateFilters();
+  applyFilters();
+  bindEvents();
+}
+
+/* ============================================================
+   RENDER: STATS
+   ============================================================ */
+function renderStats() {
+  const pills = [
+    `<span class="stat-pill"><span class="stat-num">${stats.total}</span> items</span>`,
+    ...Object.entries(stats.by_category).map(
+      ([cat, n]) => `<span class="stat-pill">${cat} <span class="stat-num">${n}</span></span>`
+    ),
+  ];
+  dom.statsBar.innerHTML = pills.join('');
+}
+
+/* ============================================================
+   RENDER: FILTERS
+   ============================================================ */
+function populateFilters() {
+  // Category tabs
+  const categories = ['all', ...Object.keys(stats.by_category).sort()];
+  dom.categoryTabs.innerHTML = categories.map(cat => {
+    const count = cat === 'all' ? stats.total : stats.by_category[cat];
+    const label = cat === 'all' ? 'All' : cat;
+    return `<button class="cat-btn${cat === 'all' ? ' active' : ''}" data-cat="${cat}">${label}<span class="cat-count">${count}</span></button>`;
+  }).join('');
+
+  // Type filter
+  const types = [...new Set(allItems.map(i => i.type))].sort();
+  types.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    dom.typeFilter.appendChild(opt);
+  });
+
+  // Status filter
+  const statuses = [...new Set(allItems.map(i => i.status))].sort();
+  statuses.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    dom.statusFilter.appendChild(opt);
+  });
+
+  // Project filter
+  const projects = [...new Set(allItems.flatMap(i => i.projects))].sort();
+  projects.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    dom.projectFilter.appendChild(opt);
+  });
+}
+
+/* ============================================================
+   RENDER: CARDS
+   ============================================================ */
+function renderCards(items) {
+  if (items.length === 0) {
+    dom.grid.style.display = 'none';
+    dom.emptyState.classList.add('visible');
+    return;
+  }
+
+  dom.grid.style.display = '';
+  dom.emptyState.classList.remove('visible');
+
+  dom.grid.innerHTML = items.map((item, i) => {
+    const delay = Math.min(i * 50, 500);
+    const tags = item.tags.slice(0, 5).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+    return `
+      <article class="card" tabindex="0" data-index="${i}" style="animation-delay:${delay}ms" role="button" aria-label="Open ${esc(item.title)}">
+        <div class="card-top">
+          <span class="badge badge-type" data-type="${esc(item.type)}">${esc(item.type)}</span>
+          <span class="card-date">${esc(item.date_added)}</span>
+        </div>
+        <h3 class="card-title">${esc(item.title)}</h3>
+        <span class="badge-category">${esc(item.category)}</span>
+        <p class="card-tldr">${esc(item.tldr)}</p>
+        <hr class="card-divider">
+        <div class="card-tags">${tags}</div>
+      </article>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   FILTERING + SORTING
+   ============================================================ */
+function applyFilters() {
+  let items = [...allItems];
+
+  // Search
+  if (activeFilters.search.trim()) {
+    items = fuse.search(activeFilters.search).map(r => r.item);
+  }
+
+  // Category
+  if (activeFilters.category !== 'all') {
+    items = items.filter(i => i.category === activeFilters.category);
+  }
+
+  // Type
+  if (activeFilters.type !== 'all') {
+    items = items.filter(i => i.type === activeFilters.type);
+  }
+
+  // Status
+  if (activeFilters.status !== 'all') {
+    items = items.filter(i => i.status === activeFilters.status);
+  }
+
+  // Project
+  if (activeFilters.project !== 'all') {
+    items = items.filter(i => i.projects.includes(activeFilters.project));
+  }
+
+  // Sort
+  switch (activeFilters.sort) {
+    case 'date':
+      items.sort((a, b) => b.date_added.localeCompare(a.date_added));
+      break;
+    case 'title':
+      items.sort((a, b) => a.title.localeCompare(b.title));
+      break;
+    case 'category':
+      items.sort((a, b) => a.category.localeCompare(b.category) || b.date_added.localeCompare(a.date_added));
+      break;
+  }
+
+  filteredItems = items;
+  renderCards(items);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+function openModal(item) {
+  currentItem = item;
+
+  // Meta badges
+  dom.modalMeta.innerHTML = `
+    <span class="badge badge-type" data-type="${esc(item.type)}">${esc(item.type)}</span>
+    <span class="badge-category">${esc(item.category)}</span>
+    <span class="card-date">${esc(item.date_added)}</span>
+    <span class="badge" style="background:var(--accent-dim);color:var(--text-accent);">${esc(item.status)}</span>
+  `;
+
+  // Title
+  dom.modalTitle.textContent = item.title;
+
+  // Body (rendered markdown)
+  dom.modalBody.innerHTML = marked.parse(item.body);
+
+  // Footer: tags + projects + source
+  let footerHtml = '';
+
+  if (item.tags.length) {
+    footerHtml += `<span class="modal-footer-label">tags:</span>`;
+    footerHtml += item.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+  }
+
+  if (item.projects.length) {
+    footerHtml += `<div class="modal-projects"><span class="modal-footer-label">projects:</span> ${esc(item.projects.join(', '))}</div>`;
+  }
+
+  if (item.source) {
+    const isUrl = item.source.startsWith('http');
+    footerHtml += `<div class="modal-source"><span class="modal-footer-label">source:</span> ${isUrl ? `<a href="${esc(item.source)}" target="_blank" rel="noopener">${esc(item.source)}</a>` : esc(item.source)}</div>`;
+  }
+
+  dom.modalFooter.innerHTML = footerHtml;
+
+  // Show
+  dom.modalBackdrop.classList.add('open');
+  document.body.classList.add('modal-open');
+  dom.modalClose.focus();
+}
+
+function closeModal() {
+  dom.modalBackdrop.classList.remove('open');
+  document.body.classList.remove('modal-open');
+  currentItem = null;
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function bindEvents() {
+  // Search (debounced)
+  let searchTimer;
+  dom.search.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      activeFilters.search = dom.search.value;
+      applyFilters();
+    }, 200);
+  });
+
+  // Category tabs (delegated)
+  dom.categoryTabs.addEventListener('click', (e) => {
+    const btn = e.target.closest('.cat-btn');
+    if (!btn) return;
+    dom.categoryTabs.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilters.category = btn.dataset.cat;
+    applyFilters();
+  });
+
+  // Select filters
+  dom.typeFilter.addEventListener('change', () => { activeFilters.type = dom.typeFilter.value; applyFilters(); });
+  dom.statusFilter.addEventListener('change', () => { activeFilters.status = dom.statusFilter.value; applyFilters(); });
+  dom.projectFilter.addEventListener('change', () => { activeFilters.project = dom.projectFilter.value; applyFilters(); });
+  dom.sortSelect.addEventListener('change', () => { activeFilters.sort = dom.sortSelect.value; applyFilters(); });
+
+  // Card clicks (delegated)
+  dom.grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    const idx = parseInt(card.dataset.index, 10);
+    openModal(filteredItems[idx]);
+  });
+
+  // Card keyboard
+  dom.grid.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      e.preventDefault();
+      const idx = parseInt(card.dataset.index, 10);
+      openModal(filteredItems[idx]);
+    }
+  });
+
+  // Modal close
+  dom.modalClose.addEventListener('click', closeModal);
+  dom.modalBackdrop.addEventListener('click', (e) => {
+    if (e.target === dom.modalBackdrop) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dom.modalBackdrop.classList.contains('open')) closeModal();
+  });
+
+  // Mobile filter toggle
+  dom.filterToggle.addEventListener('click', () => {
+    const isOpen = dom.filtersCollapsible.classList.toggle('open');
+    dom.filterToggle.setAttribute('aria-expanded', isOpen);
+  });
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function esc(str) {
+  if (typeof str !== 'string') return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

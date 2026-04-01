@@ -1,0 +1,13 @@
+{
+  "name": "trove",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ben Akiva's Idea Vault",
+  "scripts": {
+    "build": "node scripts/build-index.js"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  }
+}

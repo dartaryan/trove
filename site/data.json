@@ -1,0 +1,87 @@
+{
+  "items": [
+    {
+      "title": "Repomix — Pack Entire Codebases for Claude",
+      "type": "tool",
+      "category": "devtools",
+      "tags": [
+        "codebase",
+        "claude",
+        "context",
+        "developer-tools"
+      ],
+      "projects": [
+        "ORBIT",
+        "Training"
+      ],
+      "source": "https://github.com/yamadashy/repomix",
+      "date_added": "2026-04-01",
+      "status": "raw",
+      "path": "vault/devtools/2026-04-01-repomix-codebase-packing.md",
+      "slug": "2026-04-01-repomix-codebase-packing",
+      "tldr": "Repomix flattens an entire repository into a single text file optimized for LLM context windows. One command gives Claude full codebase awareness without manual file-by-file pasting.",
+      "body": "# Repomix — Pack Entire Codebases for Claude\n\n## TL;DR\n\nRepomix flattens an entire repository into a single text file optimized for LLM context windows. One command gives Claude full codebase awareness without manual file-by-file pasting.\n\n## Details\n\nRepomix is a CLI tool that:\n\n1. **Scans** a repository (respects `.gitignore`)\n2. **Concatenates** all files with clear delimiters and file path headers\n3. **Counts tokens** and warns if you're exceeding context limits\n4. **Outputs** a single `.txt` or `.xml` file ready to paste into Claude\n\n### Key features\n\n- **Smart filtering** — skip `node_modules`, binaries, lock files automatically\n- **Token counting** — shows exact token count per file and total\n- **Output formats** — plain text, XML (with file path attributes), or markdown\n- **Config file** — `.repomixrc` for per-project customization\n- **Tree output** — includes the directory tree at the top for orientation\n\n### Usage\n\n```bash\nnpx repomix                           # pack current directory\nnpx repomix --output codebase.xml     # XML format\nnpx repomix --include \"src/**\"        # only src/\nnpx repomix --style xml               # structured XML output\n```\n\n### Why XML format matters\n\nClaude performs better with XML-structured input. The XML output wraps each file in `<file path=\"src/foo.ts\">` tags, making it trivial for Claude to reference specific files by path. This is measurably better than plain concatenation for code review and refactoring tasks.\n\n## Why This Matters for Ben\n\n- **ORBIT workflows**: When an Orchestrator agent needs full codebase awareness before planning, Repomix provides it in one shot\n- **Training demos**: Show participants how to give Claude \"project memory\" — paste the Repomix output and Claude understands the entire architecture\n- **Client work**: For OptiPlan or any freelance project, Repomix + Claude = instant onboarding to any codebase\n\n## Teaching Angle\n\n**Live demo (3 min):**\n1. Run `npx repomix` on a sample repo\n2. Show the token count: \"This 50-file project fits in 40K tokens\"\n3. Paste into Claude, ask an architecture question\n4. Claude answers with full context — no hallucination about file structure\n\n**Key insight to teach:** \"The bottleneck isn't Claude's intelligence — it's what you put in the context window. Repomix solves the input problem.\"\n\n## Links\n\n- Repository: https://github.com/yamadashy/repomix\n- npm: https://www.npmjs.com/package/repomix"
+    },
+    {
+      "title": "Agentic Search Beats RAG for Code Understanding",
+      "type": "pattern",
+      "category": "orbit",
+      "tags": [
+        "agentic-search",
+        "rag",
+        "claude-code",
+        "architecture"
+      ],
+      "projects": [
+        "ORBIT",
+        "Training"
+      ],
+      "source": "Observed in Claude Code behavior, validated across multiple codebases",
+      "date_added": "2026-04-01",
+      "status": "raw",
+      "path": "vault/orbit/2026-04-01-agentic-search-beats-rag.md",
+      "slug": "2026-04-01-agentic-search-beats-rag",
+      "tldr": "For codebase understanding, Claude Code's approach of iteratively reading files, following imports, and building context on-the-fly consistently outperforms pre-indexed RAG systems. The agent decides what to read based on what it's already learned — no pre-processing needed.",
+      "body": "# Agentic Search Beats RAG for Code Understanding\n\n## TL;DR\n\nFor codebase understanding, Claude Code's approach of iteratively reading files, following imports, and building context on-the-fly consistently outperforms pre-indexed RAG systems. The agent decides what to read based on what it's already learned — no pre-processing needed.\n\n## Details\n\n### The RAG approach (traditional)\n\n1. Pre-index the codebase into vector embeddings\n2. User asks a question\n3. Retrieve top-K relevant chunks by semantic similarity\n4. LLM answers based on retrieved chunks\n\n**Problems:**\n- Chunks lose context (a function without its imports is incomplete)\n- Embedding similarity doesn't capture *structural* relationships (call chains, inheritance)\n- Index must be rebuilt when code changes\n- Fixed chunk size means either too little context or too much noise\n\n### The agentic search approach (Claude Code)\n\n1. User asks a question\n2. Agent reads the most likely entry point (e.g., the file mentioned, or `src/index.ts`)\n3. Agent notices imports, follows them — reads those files\n4. Agent identifies the relevant code path, reads deeper\n5. Agent builds understanding iteratively, stopping when confident\n\n**Why it works better:**\n- **Context follows structure** — the agent reads files in dependency order, just like a human developer would\n- **Adaptive depth** — simple questions need 2-3 files; complex ones trigger deeper exploration\n- **Always current** — no index to maintain; reads the actual files\n- **Reasoning at each step** — the agent decides *what to read next* based on *what it just learned*\n\n### The key insight\n\nRAG treats code as text. Agentic search treats code as a *graph* of interconnected modules. Code is inherently structured — functions call other functions, types compose, modules depend on modules. An agent that follows these connections naturally builds the right context.\n\n### When RAG still wins\n\n- **Massive codebases** (100K+ files) where agentic search would be too slow\n- **Keyword lookups** across the entire codebase (grep-like queries)\n- **Repeated queries** against a stable corpus (documentation, not code)\n\n## Why This Matters for Ben\n\n- Core ORBIT insight: design multi-agent systems that explore rather than pre-index\n- Training sessions: this is the \"aha moment\" — show Claude navigating a codebase live vs. a RAG system returning disconnected chunks\n- Architecture decisions: when building AI tools, default to agentic patterns for code, RAG for documents\n\n## Teaching Angle\n\n**Side-by-side demo (10 min):**\n1. Show a RAG system answering \"how does authentication work?\" — it returns 5 chunks, some irrelevant\n2. Show Claude Code answering the same question — watch it read `auth/index.ts`, follow the middleware chain, find the token validation logic, and explain the full flow\n3. Key line: \"The agent doesn't search *for* the answer. It *traces* the answer through the code, like a senior developer would.\"\n\n**Analogy for non-technical audience:** \"RAG is like searching a book's index. Agentic search is like reading the book, following the footnotes, and building understanding as you go.\"\n\n## Links\n\n- Claude Code documentation: https://docs.anthropic.com/en/docs/claude-code\n- ORBIT methodology: Internal"
+    },
+    {
+      "title": "GitNexus — Codebase Visualization for Live Training",
+      "type": "demo",
+      "category": "teaching",
+      "tags": [
+        "visualization",
+        "codebase",
+        "demo",
+        "training"
+      ],
+      "projects": [
+        "Training"
+      ],
+      "source": "https://gitnexus.com",
+      "date_added": "2026-04-01",
+      "status": "raw",
+      "path": "vault/teaching/2026-04-01-gitnexus-codebase-visualization.md",
+      "slug": "2026-04-01-gitnexus-codebase-visualization",
+      "tldr": "GitNexus renders a live, interactive 3D graph of any Git repository's structure — files, dependencies, commit history. Perfect for opening an AI training session with a \"wow\" moment that makes abstract architecture tangible.",
+      "body": "# GitNexus — Codebase Visualization for Live Training\n\n## TL;DR\n\nGitNexus renders a live, interactive 3D graph of any Git repository's structure — files, dependencies, commit history. Perfect for opening an AI training session with a \"wow\" moment that makes abstract architecture tangible.\n\n## Details\n\nGitNexus takes a repo URL (or local path) and generates an interactive visualization showing:\n\n- **File tree as a force-directed graph** — clusters by directory, colored by language\n- **Dependency lines** — imports/requires drawn as edges between nodes\n- **Commit heatmap** — recently changed files glow hotter, stale files fade\n- **Contributor overlay** — who owns what, visually\n\nYou can zoom, rotate, filter by language, and click any node to see the file's content. It runs in the browser — no install needed for the audience.\n\n### Why it works for training\n\nWhen you're teaching people how Claude Code navigates a codebase, showing them the actual graph first gives them a mental model. Instead of saying \"Claude reads the imports and follows the dependency chain,\" you can *show* the chain, then demonstrate Claude doing exactly that.\n\nThe visual before/after is powerful: \"Here's the codebase as a human sees it [GitNexus graph]. Here's how Claude sees it [agentic search demo]. Notice they arrive at the same understanding.\"\n\n## Why This Matters for Ben\n\n- Opens every training session with something visually impressive\n- Makes the \"agentic search\" concept concrete for non-technical audiences\n- Works with any repo — can use the client's own codebase for maximum relevance\n- Zero setup for the audience (browser-based)\n\n## Teaching Angle\n\n**Session opener (5 min):**\n1. Clone a participant's repo live (or use a prepared one)\n2. Run GitNexus — let the audience react to the visualization\n3. Point out: \"This is the complexity Claude navigates in seconds\"\n4. Transition to the Claude Code demo\n\n**Pairs with:** Repomix (for showing what Claude actually receives), agentic search pattern (for explaining how Claude explores).\n\n## Links\n\n- GitNexus: https://gitnexus.com\n- Alternative: https://github.com/nickeax/repo-visualizer (static SVG version)"
+    }
+  ],
+  "stats": {
+    "total": 3,
+    "by_category": {
+      "devtools": 1,
+      "orbit": 1,
+      "teaching": 1
+    },
+    "by_type": {
+      "tool": 1,
+      "pattern": 1,
+      "demo": 1
+    },
+    "by_status": {
+      "raw": 3
+    },
+    "latest_date": "2026-04-01"
+  },
+  "generated_at": "2026-04-01T00:52:56.072Z"
+}
