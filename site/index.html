@@ -334,10 +334,8 @@ header {
 
 .dropdown-menu {
   display: none;
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  min-width: 100%;
+  position: fixed;
+  min-width: 140px;
   background: var(--surface);
   border: 1px solid var(--surface-border-hover);
   border-radius: var(--r-md);
@@ -1261,6 +1259,10 @@ function bindEvents() {
       if (!wasOpen) {
         dd.classList.add('open');
         trigger.setAttribute('aria-expanded', 'true');
+        const rect = trigger.getBoundingClientRect();
+        menu.style.top = (rect.bottom + 4) + 'px';
+        menu.style.left = rect.left + 'px';
+        menu.style.minWidth = rect.width + 'px';
       }
     });
 
